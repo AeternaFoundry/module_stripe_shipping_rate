@@ -52,5 +52,45 @@ EOT
       })))
     })))
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.shipping_rates : (
+        v.tax_behavior == null || (contains(["exclusive", "inclusive", "unspecified"], v.tax_behavior))
+      )
+    ])
+    error_message = "must be one of: \"exclusive\", \"inclusive\", \"unspecified\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.shipping_rates : (
+        v.type == null || (contains(["fixed_amount"], v.type))
+      )
+    ])
+    error_message = "must be one of: \"fixed_amount\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.shipping_rates : (
+        v.delivery_estimate == null || alltrue([for item in v.delivery_estimate : (item.maximum == null || alltrue([for item in item.maximum : (contains(["business_day", "day", "hour", "month", "week"], item.unit))]))])
+      )
+    ])
+    error_message = "must be one of: \"business_day\", \"day\", \"hour\", \"month\", \"week\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.shipping_rates : (
+        v.delivery_estimate == null || alltrue([for item in v.delivery_estimate : (item.minimum == null || alltrue([for item in item.minimum : (contains(["business_day", "day", "hour", "month", "week"], item.unit))]))])
+      )
+    ])
+    error_message = "must be one of: \"business_day\", \"day\", \"hour\", \"month\", \"week\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.shipping_rates : (
+        v.fixed_amount == null || alltrue([for item in v.fixed_amount : (item.currency_options == null || alltrue([for item in item.currency_options : (item.tax_behavior == null || (contains(["exclusive", "inclusive", "unspecified"], item.tax_behavior)))]))])
+      )
+    ])
+    error_message = "must be one of: \"exclusive\", \"inclusive\", \"unspecified\""
+  }
 }
 
